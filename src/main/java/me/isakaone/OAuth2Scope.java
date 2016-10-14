@@ -1,4 +1,4 @@
-package com.zepetto;
+package me.isakaone;
 
 public enum OAuth2Scope {
 	read("read"),

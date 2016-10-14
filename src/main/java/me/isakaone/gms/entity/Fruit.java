@@ -1,4 +1,4 @@
-package com.zepetto.gms.entity;
+package me.isakaone.gms.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

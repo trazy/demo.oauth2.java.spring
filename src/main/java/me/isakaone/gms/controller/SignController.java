@@ -1,4 +1,4 @@
-package com.zepetto.gms.controller;
+package me.isakaone.gms.controller;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

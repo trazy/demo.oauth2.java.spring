@@ -1,4 +1,4 @@
-package com.zepetto;
+package me.isakaone;
 
 public enum OAuth2GrantType {
 	client_credentials("client_credentials"),

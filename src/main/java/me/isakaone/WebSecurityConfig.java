@@ -1,4 +1,4 @@
-package com.zepetto;
+package me.isakaone;
 
 import javax.sql.DataSource;
 

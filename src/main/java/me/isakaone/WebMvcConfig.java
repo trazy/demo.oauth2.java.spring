@@ -1,4 +1,4 @@
-package com.zepetto;
+package me.isakaone;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -9,8 +9,8 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import com.zepetto.gms.entity.Fruit;
-import com.zepetto.gms.repositories.FruitRepository;
+import me.isakaone.gms.entity.Fruit;
+import me.isakaone.gms.repositories.FruitRepository;
 
 @Configuration
 @EnableWebMvc

@@ -1,14 +1,14 @@
-package com.zepetto;
+package me.isakaone;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = "com.zepetto")
-public class GmsApplication {
+@ComponentScan(basePackages = "me.isakaone")
+public class DemoApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(GmsApplication.class, args);
+		SpringApplication.run(DemoApplication.class, args);
 	}
 }
