@@ -1,0 +1,21 @@
+{
+  "name": "zpt.gms",
+  "authors": [
+    "jaehyun2.pak <jaehyun2.pak@zepetto.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "src/main/resources/static/lib/",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "v4.0.0-alpha.4"
+  }
+}
