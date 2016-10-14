@@ -1,7 +1,7 @@
 {
-  "name": "zpt.gms",
+  "name": "demo.oauth2.java.spring",
   "authors": [
-    "jaehyun2.pak <jaehyun2.pak@zepetto.com>"
+    "trazy <trazy@naver.com>"
   ],
   "description": "",
   "main": "",
@@ -11,7 +11,7 @@
     "**/.*",
     "node_modules",
     "bower_components",
-    "src/main/resources/static/lib/",
+    "src/main/resources/static/assets/",
     "test",
     "tests"
   ],
