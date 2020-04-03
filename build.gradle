@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		springBootVersion = '1.4.1.RELEASE'
+		springBootVersion = '1.4.3.RELEASE'
 		springVersion = '4.3.3.RELEASE'
 	}
 	repositories {
@@ -12,12 +12,22 @@ buildscript {
 }
 
 apply plugin: 'java'
-apply plugin: 'eclipse'
+apply plugin: 'idea'
 apply plugin: 'spring-boot'
 
-jar {
-	baseName = 'demo.oauth2.java.spring'
-	version = '0.0.1-SNAPSHOT'
+task copyAssets {
+	doLast {
+		copy {
+			from "${projectDir}/node_modules"
+			into "${buildDir}/resources/main/public/assets"
+		}
+	}
+}
+
+processResources.dependsOn(copyAssets)
+
+springBoot {
+	mainClass = 'me.isakaone.DemoApplication'
 }
 
 sourceCompatibility = 1.8
@@ -29,15 +39,18 @@ repositories {
 
 
 dependencies {
-	compile('org.springframework.boot:spring-boot-starter-data-jpa')
-	compile('org.springframework.boot:spring-boot-starter-data-rest')
-	compile('org.springframework.boot:spring-boot-devtools')
+	compile("org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}")
+	compile("org.springframework.boot:spring-boot-starter-data-rest:${springBootVersion}")
+	compile('org.springframework.boot:spring-boot-starter-undertow')
 	compile('org.springframework.boot:spring-boot-starter-security')
 	compile('org.springframework.boot:spring-boot-starter-thymeleaf')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.springframework.security.oauth:spring-security-oauth2')
 	compile('org.springframework.data:spring-data-rest-hal-browser')
+	compile('javax.xml.bind:jaxb-api:2.3.0')
+	compile('javax.activation:activation:1.1')
+	compile('org.glassfish.jaxb:jaxb-runtime:2.3.0')
 	runtime('com.h2database:h2')
-	testCompile('org.springframework.boot:spring-boot-starter-test')
+	testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 }
 

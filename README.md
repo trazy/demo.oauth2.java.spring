@@ -3,7 +3,7 @@
 ## run!
 
 ```sh
-bower install
+yarn install
 gradle task bootRun
 ```
 

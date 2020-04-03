@@ -33,7 +33,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		http.headers().frameOptions().disable();
 		http
 			.antMatcher("/**").authorizeRequests()
-			.antMatchers("/", "/index.html", "/favicon.ico", "/assets/**", "/sign-*", "/h2-console*").permitAll()
+			.antMatchers("/", "/index.html", "/favicon.ico", "/node_modules/**", "/assets/**", "/sign-*", "/h2-console*").permitAll()
 			.anyRequest().authenticated()
 			.and()
 			.httpBasic()
