@@ -25,6 +25,8 @@ task copyAssets {
 }
 
 processResources.dependsOn(copyAssets)
+bootRun.dependsOn(copyAssets)
+bootRepackage.dependsOn(copyAssets)
 
 springBoot {
 	mainClass = 'me.isakaone.DemoApplication'
