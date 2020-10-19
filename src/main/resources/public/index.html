@@ -2,515 +2,729 @@
 <html lang="ko">
 <head>
 
-<title>OAuth2 Usage</title>
+  <title>OAuth2 Usage</title>
 
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
 
-<link rel="stylesheet" href="/assets/tether/dist/css/tether.min.css" />
-<link rel="stylesheet" href="/assets/bootstrap/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="/assets/tether/dist/css/tether.min.css"/>
+  <link rel="stylesheet" href="/assets/bootstrap/dist/css/bootstrap.min.css"/>
 
-<script src="/assets/jquery/dist/jquery.min.js"></script>
-<script src="/assets/tether/dist/js/tether.min.js"></script>
-<script src="/assets/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="/assets/jquery/dist/jquery.min.js"></script>
+  <script src="/assets/tether/dist/js/tether.min.js"></script>
+  <script src="/assets/bootstrap/dist/js/bootstrap.min.js"></script>
 
-<script type="text/javascript">
-'use strict';
-$(document).ready(function() {
-	$('form[grant_type="client_credentials"]').on('click', 'button:first', function() {
-		var form = $(this).parents('form:first');
-		var client_id = form.find('input[name="client_id"]').val().trim();
-		var secret = form.find('input[name="secret"]').val().trim();
-		$.ajax({
-			url: '/oauth/token',
-			type: 'POST',
-			headers: {
-				Authorization: 'Basic ' + btoa( [ client_id, secret, ].join(':') )
-			},
-			data: {
-				grant_type: 'client_credentials',
-			},
-			dataType: 'text',
-			xhrFields: {
-				withCredentials: true,
-			},
-		}).then(function(data, textStatus, jqXHR) {
-			form.find('div:last').removeAttr('hidden').find('textarea:first').val(data);
-			$('form[exec="rest-fruits"]').find('input[name="access_token"]').val(JSON.parse(data).access_token);
-		})
-	});
-	
-	$('form[grant_type="password"]').on('click', 'button:first', function() {
-		var form = $(this).parents('form:first');
-		var client_id = form.find('input[name="client_id"]').val().trim();
-		var username = form.find('input[name="username"]').val().trim();
-		var password = form.find('input[name="password"]').val().trim();
-		$.ajax({
-			url: '/oauth/token',
-			type: 'POST',
-			headers: {
-				Authorization: 'Basic ' + btoa( client_id + ':')
-			},
-			data: {
-				grant_type: 'password',
-				username: username,
-				password: password,
-			},
-			dataType: 'text',
-			xhrFields: {
-				withCredentials: true,
-			},
-		}).then(function(data, textStatus, jqXHR) {
-			form.find('div:last').removeAttr('hidden').find('textarea:first').val(data);
-			var result = JSON.parse(data);
-			$('form[grant_type="refresh_token"]').find('input[name="client_id"]').val(client_id);
-			$('form[grant_type="refresh_token"]').find('input[name="refresh_token"]').val(result.refresh_token);
-			$('form[exec="rest-fruits"]').find('input[name="access_token"]').val(result.access_token);
-		});
-	});
-	
-	$('form[grant_type="refresh_token"]').on('click', 'button:first', function() {
-		var form = $(this).parents('form:first');
-		$.ajax({
-			url: '/oauth/token',
-			type: 'POST',
-			headers: {
-				Authorization: 'Basic ' + btoa( form.find('input[name="client_id"]').val().trim() + ':')
-			},
-			data: {
-				grant_type: 'refresh_token',
-				refresh_token: form.find('input[name="refresh_token"]').val().trim(),
-			},
-			dataType: 'text',
-			xhrFields: {
-				withCredentials: true,
-			},
-		}).then(function(data, textStatus, jqXHR) {
-			form.find('div:last').removeAttr('hidden').find('textarea:first').val(data);
-			$('form[exec="rest-fruits"]').find('input[name="access_token"]').val(JSON.parse(data).access_token);
-		});
-	});
-	
-	var getParam = function(key, qs) {
-		key = key.replace(/[*+?^$.\[\]{}()|\\\/]/g, "\\$&");
-		var match = qs.match(new RegExp("[?&]"+key+"=([^&]+)(&|$)"));
-		return match && decodeURIComponent(match[1].replace(/\+/g, " "));
-	};
-	
-	var getParamFromQueryString = function(key) {
-		return getParam(key, document.location.search)
-	};
-	
-	var getParamFromHashTag = function(key) {
-		return getParam(key, '?' + document.location.hash.substr(1));
-	}
-	
-	var issuedCode = getParamFromQueryString("code");
-	if ("string" === typeof issuedCode && issuedCode.length > 0) {
-		$('form[grant_type="authorization_code"]').find('input[name="code"]').val(issuedCode);
-		$('html, body').animate({ scrollTop: $('form[grant_type="authorization_code"]').parents('div.card.m-t-1:first').offset().top}, 400);
-	}
-	
-	$('form[grant_type="authorization_code"]').on('click', 'button:first', function() {
-		var form = $(this).parents('form:first');
-		$.ajax({
-			url: '/oauth/token',
-			type: 'POST',
-			headers: {
-				Authorization: 'Basic ' + btoa( form.find('input[name="client_id"]').val().trim() + ':')
-			},
-			data: {
-				grant_type: 'authorization_code',
-				redirect_uri: 'http://localhost:8080',
-				code: form.find('input[name="code"]').val().trim(),
-			},
-			dataType: 'text',
-			xhrFields: {
-				withCredentials: true,
-			},
-		}).then(function(data, textStatus, jqXHR) {
-			$('form[exec="rest-fruits"]').find('input[name="access_token"]').val(JSON.parse(data).access_token);
-			form.find('div:last').removeAttr('hidden').find('textarea:first').val(data);
-		});
-	});
-	
-	if ("string" === typeof document.location.hash && document.location.hash.length > 2) {
-		$('form[grant_type="implicit"]').find('div:last').find('textarea:first').val(document.location.hash.substr(1));
-		$('form[exec="rest-fruits"]').find('input[name="access_token"]').val(getParamFromHashTag('access_token'));
-		$('html, body').animate({ scrollTop: $('form[grant_type="implicit"]').parents('div.card.m-t-1:first').offset().top}, 400);
-	}
-	
-	$('form[exec="rest-fruits"]').on('click', 'button:first', function() {
-		var form = $('form[exec="rest-fruits"]');
-		var access_token = form.find('input[name="access_token"]').val();
-		if ("string" !== typeof access_token || access_token.length < 1) {
-			return false;
-		}
-		$.ajax({
-			url: '/api/fruits',
-			type: 'GET',
-			headers: {
-				Authorization: 'Bearer ' + access_token,
-			},
-			dataType: 'text',
-			xhrFields: {
-				withCredentials: true,
-			},
-		}).then(function(data, textStatus, jqXHR) {
-			form.find('div:last').removeAttr('hidden').find('textarea:first').val(data);
-		});
-	});
-	
-});
-</script>
+  <script type="text/javascript">
+    'use strict';
+    $(document).ready(function () {
+      $('form[grant_type="client_credentials"]').on('click', 'button:first', function () {
+        var form = $(this).parents('form:first');
+        var client_id = form.find('input[name="client_id"]').val().trim();
+        var secret = form.find('input[name="secret"]').val().trim();
+        $.ajax({
+          url: '/oauth/token',
+          type: 'POST',
+          headers: {
+            Authorization: 'Basic ' + btoa([client_id, secret,].join(':'))
+          },
+          data: {
+            grant_type: 'client_credentials',
+          },
+          dataType: 'text',
+          xhrFields: {
+            withCredentials: true,
+          },
+        }).then(function (data, textStatus, jqXHR) {
+          form.find('div:last').removeAttr('hidden').find('textarea:first').val(data);
+          $('form[exec="rest-fruits"]').find('input[name="access_token"]').val(
+              JSON.parse(data).access_token);
+        })
+      });
+
+      $('form[grant_type="password"]').on('click', 'button:first', function () {
+        var form = $(this).parents('form:first');
+        var client_id = form.find('input[name="client_id"]').val().trim();
+        var username = form.find('input[name="username"]').val().trim();
+        var password = form.find('input[name="password"]').val().trim();
+        $.ajax({
+          url: '/oauth/token',
+          type: 'POST',
+          headers: {
+            Authorization: 'Basic ' + btoa(client_id + ':')
+          },
+          data: {
+            grant_type: 'password',
+            username: username,
+            password: password,
+          },
+          dataType: 'text',
+          xhrFields: {
+            withCredentials: true,
+          },
+        }).then(function (data, textStatus, jqXHR) {
+          form.find('div:last').removeAttr('hidden').find('textarea:first').val(data);
+          var result = JSON.parse(data);
+          $('form[grant_type="refresh_token"]').find('input[name="client_id"]').val(client_id);
+          $('form[grant_type="refresh_token"]').find('input[name="refresh_token"]').val(
+              result.refresh_token);
+          $('form[exec="rest-fruits"]').find('input[name="access_token"]').val(result.access_token);
+        });
+      });
+
+      $('form[grant_type="refresh_token"]').on('click', 'button:first', function () {
+        var form = $(this).parents('form:first');
+        $.ajax({
+          url: '/oauth/token',
+          type: 'POST',
+          headers: {
+            Authorization: 'Basic ' + btoa(form.find('input[name="client_id"]').val().trim() + ':')
+          },
+          data: {
+            grant_type: 'refresh_token',
+            refresh_token: form.find('input[name="refresh_token"]').val().trim(),
+          },
+          dataType: 'text',
+          xhrFields: {
+            withCredentials: true,
+          },
+        }).then(function (data, textStatus, jqXHR) {
+          form.find('div:last').removeAttr('hidden').find('textarea:first').val(data);
+          $('form[exec="rest-fruits"]').find('input[name="access_token"]').val(
+              JSON.parse(data).access_token);
+        });
+      });
+
+      var getParam = function (key, qs) {
+        key = key.replace(/[*+?^$.\[\]{}()|\\\/]/g, "\\$&");
+        var match = qs.match(new RegExp("[?&]" + key + "=([^&]+)(&|$)"));
+        return match && decodeURIComponent(match[1].replace(/\+/g, " "));
+      };
+
+      var getParamFromQueryString = function (key) {
+        return getParam(key, document.location.search)
+      };
+
+      var getParamFromHashTag = function (key) {
+        return getParam(key, '?' + document.location.hash.substr(1));
+      }
+
+      var issuedCode = getParamFromQueryString("code");
+      if ("string" === typeof issuedCode && issuedCode.length > 0) {
+        $('form[grant_type="authorization_code"]').find('input[name="code"]').val(issuedCode);
+        $('html, body').animate({
+          scrollTop: $('form[grant_type="authorization_code"]').parents(
+              'div.card.mt-3:first').offset().top
+        }, 400);
+      }
+
+      $('form[grant_type="authorization_code"]').on('click', 'button:first', function () {
+        var form = $(this).parents('form:first');
+        $.ajax({
+          url: '/oauth/token',
+          type: 'POST',
+          headers: {
+            Authorization: 'Basic ' + btoa(form.find('input[name="client_id"]').val().trim() + ':')
+          },
+          data: {
+            grant_type: 'authorization_code',
+            redirect_uri: 'http://localhost:8080',
+            code: form.find('input[name="code"]').val().trim(),
+          },
+          dataType: 'text',
+          xhrFields: {
+            withCredentials: true,
+          },
+        }).then(function (data, textStatus, jqXHR) {
+          $('form[exec="rest-fruits"]').find('input[name="access_token"]').val(
+              JSON.parse(data).access_token);
+          form.find('div:last').removeAttr('hidden').find('textarea:first').val(data);
+        });
+      });
+
+      if ("string" === typeof document.location.hash && document.location.hash.length > 2) {
+        $('form[grant_type="implicit"]').find('div:last').find('textarea:first').val(
+            document.location.hash.substr(1));
+        $('form[exec="rest-fruits"]').find('input[name="access_token"]').val(
+            getParamFromHashTag('access_token'));
+        $('html, body').animate({
+          scrollTop: $('form[grant_type="implicit"]').parents('div.card.mt-3:first').offset().top
+        }, 400);
+      }
+
+      $('form[exec="rest-fruits"]').on('click', 'button:first', function () {
+        var form = $('form[exec="rest-fruits"]');
+        var access_token = form.find('input[name="access_token"]').val();
+        if ("string" !== typeof access_token || access_token.length < 1) {
+          return false;
+        }
+        $.ajax({
+          url: '/api/fruits',
+          type: 'GET',
+          headers: {
+            Authorization: 'Bearer ' + access_token,
+          },
+          dataType: 'text',
+          xhrFields: {
+            withCredentials: true,
+          },
+        }).then(function (data, textStatus, jqXHR) {
+          form.find('div:last').removeAttr('hidden').find('textarea:first').val(data);
+        });
+      });
+
+    });
+  </script>
 
 </head>
 <body>
-	<div class="container m-t-1">
-		<div class="jumbotron">
-			<h1 class="display-3">OAuth2 간단 매뉴얼</h1>
-			<hr class="m-y-2">
-			<p>Spring-Security-OAuth2 서버 세팅 된 내용에 따라 사용하는 간략한 튜토리얼</p>
-		</div>
-		
-		<div class="row">
-			<div class="col-xs-12">
-				<h2><strong>0. Intro.</strong></h2>
-				<hr />
-				<h4>Principal</h4>
-				<ul>
-					<li>사용자</li>
-				</ul>
-				<h4>Authentication</h4>
-				<ul>
-					<li>인증</li>
-					<li>사용자를 식별</li>
-					<li>ex &gt; 나는 누구누구다. -( 인증 )-&gt; 당신이 누구누구인 것을 확인하였습니다.</li>
-				</ul>
-				<h4>Authorization</h4>
-				<ul>
-					<li>인가</li>
-					<li>사용자가 적합한 권한을 가지고 있는지 확인</li>
-					<li>ex &gt; 게시물 목록을 가져가고 싶다. -( 인가 )-&gt; 당신은 게시물 목록을 가져갈 권한이 없습니다.</li>
-				</ul>
-				<h4>OAuth2</h4>
-				<ul>
-					<li>인증 + 인가를 위한 표준 프로토콜</li>
-					<li>주 목적은 인가 ( Resource에 대한 접근 제어 )</li>
-					<li>OAuth1.0은 보안 문제로 현재 사용되지 않음</li>
-					<li>OAuth2의 개발에 참여한 Eran Hammer가 OAuth2의 안전성에 의문을 제기하여 논란이 있음</li>
-					<li>기본적으로 확장이 용이하게 만들어져 기능을 멋대로 구현하는 경우들이 있으므로 주의</li>
-				</ul>
-				<h4>Resource</h4>
-				<ul>
-					<li>Service Provider가 제공하는 Service 자체</li>
-					<li>Resource에의 접근은 반드시 인가가 수반됨 ( 예를 들어 관리 페이지에 접근 시에는 관리자 권한이 필요 )</li>
-				</ul>
-				<h4>Service Provider</h4>
-				<ul>
-					<li>인증과 인가에 대한 정보를 가지고 있는 application</li>
-					<li>예를 들어 OAuth2를 제공하고 있는 트위터나, 페이스북, 구글이 이에 해당</li>
-				</ul>
-				<h4>Consumer</h4>
-				<ul>
-					<li>서비스를 이용하는 application</li>
-					<li>Consumer는 오로지 인가를 확인할 수 있는 Access Token만을 가지고 Service Provider가 소유한 Resource에 대한 요청을 한다.</li>
-				</ul>
-				<h4>Access Token</h4>
-				<ul>
-					<li>Resource에 접근하기 위해 사용되는, 인증 후에 발급되는 토큰</li>
-					<li>보통 얼마간의 시간만 유효하며 이후 만료되도록 만듬 ( 보안 상의 이유 )</li>
-				</ul>
-				<h4>Refresh Token</h4>
-				<ul>
-					<li>Access Token을 재발급받기 위해 사용하는 토큰</li>
-					<li>보통 만료되는 Access Token 발급 시에 같이 발급됨</li>
-					<li>Refresh Token도 만료시켜버리는 경우도 있고 아닌 경우도 있음</li>
-				</ul>
-			</div>
-		</div>
-		
-		<div class="row m-t-3">
-			<div class="col-xs-12">
-				<h2><strong>1. Authentication</strong></h2>
-				<hr />
-				<ol>
-					<li>
-						<h4>client_credentials</h4>
-						<ul>
-							<li>Confidential Client이면 사용</li>
-							<li>백엔드 서버 같이 secret을 들고 있을 수 있는, 신뢰할 수 있는 경우</li>
-							<li>http 요청 자체에 secret이 남는 방법이므로 service provider는 SSL을 사용하는 것을 강력히 권고함</li>
-						</ul>
-						<div class="card m-t-1">
-							<div class="card-header">Example &gt; cURL</div>
-							<div class="card-block">
-								<pre><code>curl -u from-backend-application:blahblah http://localhost:8080/oauth/token -d "grant_type=client_credentials"</code></pre>
-								<hr />
-								<p>response example</p>
-								<pre><code>{
-	"access_token": "8e190bb9-5e27-46bd-905f-cdda26258f0c",
-	"token_type": "bearer",
-	"expires_in": 43199,
-	"scope": "read write trusted"
+<div class="container">
+  <div class="container">
+    <div class="jumbotron">
+      <h1 class="display-4">OAuth2 간단 매뉴얼</h1>
+      <hr class="m-y-2"/>
+      <p>
+        Spring-Security-OAuth2 서버 세팅 된 내용에 따라 사용하는 간략한
+        튜토리얼
+      </p>
+    </div>
+  </div>
+
+  <div class="container mt-3">
+    <h2 class="display-4">0. Intro</h2>
+    <hr/>
+
+    <div class="container mt-3">
+      <h4>Principal</h4>
+      <ul>
+        <li>사용자</li>
+      </ul>
+    </div>
+
+    <div class="container mt-3">
+      <h4>Authentication</h4>
+      <ul>
+        <li>인증</li>
+        <li>사용자를 식별</li>
+        <li>
+          ex &gt; 나는 누구누구다. -( 인증 )-&gt; 당신이 누구누구인 것을
+          확인하였습니다.
+        </li>
+      </ul>
+    </div>
+
+    <div class="container mt-3">
+      <h4>Authorization</h4>
+      <ul>
+        <li>인가</li>
+        <li>사용자가 적합한 권한을 가지고 있는지 확인</li>
+        <li>
+          ex &gt; 게시물 목록을 가져가고 싶다. -( 인가 )-&gt; 당신은 게시물
+          목록을 가져갈 권한이 없습니다.
+        </li>
+      </ul>
+    </div>
+
+    <div class="container mt-3">
+      <h4>OAuth2</h4>
+      <ul>
+        <li>인증 + 인가를 위한 표준 프로토콜</li>
+        <li>주 목적은 인가 ( Resource에 대한 접근 제어 )</li>
+        <li>OAuth1.0은 보안 문제로 현재 사용되지 않음</li>
+        <li>
+          OAuth2의 개발에 참여한 Eran Hammer가 OAuth2의 안전성에 의문을
+          제기하여 논란이 있음
+        </li>
+        <li>
+          기본적으로 확장이 용이하게 만들어져 기능을 멋대로 구현하는
+          경우들이 있으므로 주의
+        </li>
+      </ul>
+    </div>
+
+    <div class="container mt-3">
+      <h4>Resource</h4>
+      <ul>
+        <li>Service Provider가 제공하는 Service 자체</li>
+        <li>
+          Resource에의 접근은 반드시 인가가 수반됨 ( 예를 들어 관리 페이지에
+          접근 시에는 관리자 권한이 필요 )
+        </li>
+      </ul>
+    </div>
+
+    <div class="container mt-3">
+      <h4>Service Provider</h4>
+      <ul>
+        <li>인증과 인가에 대한 정보를 가지고 있는 application</li>
+        <li>
+          예를 들어 OAuth2를 제공하고 있는 트위터나, 페이스북, 구글이 이에
+          해당
+        </li>
+      </ul>
+    </div>
+
+    <div class="container mt-3">
+      <h4>Consumer</h4>
+      <ul>
+        <li>서비스를 이용하는 application</li>
+        <li>
+          Consumer는 오로지 인가를 확인할 수 있는 Access Token만을 가지고
+          Service Provider가 소유한 Resource에 대한 요청을 한다.
+        </li>
+      </ul>
+    </div>
+
+    <div class="container mt-3">
+      <h4>Access Token</h4>
+      <ul>
+        <li>Resource에 접근하기 위해 사용되는, 인증 후에 발급되는 토큰</li>
+        <li>
+          보통 얼마간의 시간만 유효하며 이후 만료되도록 만듬 ( 보안 상의
+          이유 )
+        </li>
+      </ul>
+    </div>
+
+    <div class="container">
+      <h4>Refresh Token</h4>
+      <ul>
+        <li>Access Token을 재발급받기 위해 사용하는 토큰</li>
+        <li>보통 만료되는 Access Token 발급 시에 같이 발급됨</li>
+        <li>
+          Refresh Token도 만료시켜버리는 경우도 있고 아닌 경우도 있음
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container mt-3">
+    <h2 class="display-4">1. Authentication</h2>
+    <hr/>
+    <div class="container">
+      <ol>
+        <li>
+          <h4>client_credentials</h4>
+          <ul>
+            <li>Confidential Client이면 사용</li>
+            <li>
+              백엔드 서버 같이 secret을 들고 있을 수 있는, 신뢰할 수 있는
+              경우
+            </li>
+            <li>
+              http 요청 자체에 secret이 남는 방법이므로 service provider는
+              SSL을 사용하는 것을 강력히 권고함
+            </li>
+          </ul>
+          <div class="card mt-3">
+            <div class="card-header p-2">Example &gt; cURL</div>
+            <div class="card-block p-2">
+                  <pre
+                      class="border border-info p-4"
+                  ><code>curl -u from-backend-application:blahblah http://localhost:8080/oauth/token -d "grant_type=client_credentials"</code></pre>
+              <hr/>
+              <p>response example</p>
+              <pre class="border border-info p-4"><code>{
+      "access_token": "8e190bb9-5e27-46bd-905f-cdda26258f0c",
+      "token_type": "bearer",
+      "expires_in": 43199,
+      "scope": "read write trusted"
 }</code></pre>
-								<hr />
-								<p class="m-b-0">Access Token을 만료되지 않도록 설정했기 때문에 Refresh Token이 지급되지 않았음에 주의</p>
-							</div>
-						</div>
-						<div class="card m-t-1">
-							<div class="card-header">Try via AJAX</div>
-							<form class="card-block" grant_type="client_credentials">
-								<div class="form-group">
-									<label>client_id</label>
-									<input name="client_id" type="text" class="form-control" placeholder="service provider가 발급한 client_id" value="from-backend-application" />
-								</div>
-								<div class="form-group">
-									<label>secret</label>
-									<input name="secret" type="text" class="form-control" placeholder="service provider가 발급한 client_id와 pair인 secret" value="blahblah" />
-								</div>
-								<hr />
-								<button type="button" class="btn btn-primary" id="execute-grandType-clientCredentials">Submit</button>
-								<div class="form-group" hidden="hidden">
-									<hr />
-									<label>response</label>
-									<textarea class="form-control disabled" disabled="disabled"></textarea>
-								</div>
-							</form>
-						</div>
-						
-					</li>
-					<li>
-						<h4>password</h4>
-						<ul>
-							<li>Public Client이면 사용</li>
-							<li>secret은 모르지만 해당 서비스에 가입된 사용자를 알고 있는 일반적인 클라이언트의 경우</li>
-							<li>http 요청 자체에 credential 정보가 남는 방법이므로 가능하면 사용하지 말 것을 권장</li>
-						</ul>
-						<div class="card m-t-1">
-							<div class="card-header">Example &gt; cURL</div>
-							<div class="card-block">
-								<pre><code>curl -u from-common-client: http://localhost:8080/oauth/token -d "grant_type=password&username=test&password=test"</code></pre>
-								<hr />
-								<p>response example</p>
-								<pre><code>{
-	"access_token": "a9aa2928-2a81-436d-80c1-cf9917076be4",
-	"token_type": "bearer",
-	"refresh_token": "b86b482e-e0cd-40e4-b412-9e4a2a12141e",
-	"expires_in": 59,
-	"scope": "read write"
+              <hr/>
+              <p class="m-b-0">
+                Access Token을 만료되지 않도록 설정했기 때문에 Refresh
+                Token이 지급되지 않았음에 주의
+              </p>
+            </div>
+          </div>
+          <div class="card mt-3">
+            <div class="card-header p-2">Try via AJAX</div>
+            <form class="card-block p-2" grant_type="client_credentials">
+              <div class="form-group">
+                <label>client_id</label>
+                <input
+                    name="client_id"
+                    type="text"
+                    class="form-control"
+                    placeholder="service provider가 발급한 client_id"
+                    value="from-backend-application"
+                />
+              </div>
+              <div class="form-group">
+                <label>secret</label>
+                <input
+                    name="secret"
+                    type="text"
+                    class="form-control"
+                    placeholder="service provider가 발급한 client_id와 pair인 secret"
+                    value="blahblah"
+                />
+              </div>
+              <hr/>
+              <button
+                  type="button"
+                  class="btn btn-primary"
+                  id="execute-grandType-clientCredentials"
+              >
+                Submit
+              </button>
+              <div class="form-group" hidden="hidden">
+                <hr/>
+                <label>response</label>
+                <textarea
+                    class="form-control disabled"
+                    disabled="disabled"
+                ></textarea>
+              </div>
+            </form>
+          </div>
+        </li>
+        <li>
+          <h4>password</h4>
+          <ul>
+            <li>Public Client이면 사용</li>
+            <li>
+              secret은 모르지만 해당 서비스에 가입된 사용자를 알고 있는
+              일반적인 클라이언트의 경우
+            </li>
+            <li>
+              http 요청 자체에 credential 정보가 남는 방법이므로 가능하면
+              사용하지 말 것을 권장
+            </li>
+          </ul>
+          <div class="card mt-3">
+            <div class="card-header p-2">Example &gt; cURL</div>
+            <div class="card-block p-2">
+                  <pre
+                      class="border border-info p-4"
+                  ><code>curl -u from-common-client: http://localhost:8080/oauth/token -d "grant_type=password&username=test&password=test"</code></pre>
+              <hr/>
+              <p>response example</p>
+              <pre class="border border-info p-4"><code>{
+      "access_token": "a9aa2928-2a81-436d-80c1-cf9917076be4",
+      "token_type": "bearer",
+      "refresh_token": "b86b482e-e0cd-40e4-b412-9e4a2a12141e",
+      "expires_in": 59,
+      "scope": "read write"
 }</code></pre>
-								<hr />
-								<p class="m-b-0">Access Token을 만료하도록 설정했기 때문에 Refresh Token이 발급되었음</p>
-								<p class="m-b-0">expires_in은 만료까지 남은 시간으로 단위는 초 ( second )</p>
-							</div>
-						</div>
-						<div class="card m-t-1">
-							<div class="card-header">Try via AJAX</div>
-							<form class="card-block" grant_type="password">
-								<div class="form-group">
-									<label>client_id</label>
-									<input name="client_id" type="text" class="form-control" placeholder="service provider가 발급한 client_id" value="from-common-client" />
-								</div>
-								<div class="form-group">
-									<label>username</label>
-									<input name="username" type="text" class="form-control" placeholder="service provider에 등록된 username" value="test" />
-								</div>
-								<div class="form-group">
-									<label>password</label>
-									<input name="password" type="text" class="form-control" placeholder="service provider에 등록된 username의 password" value="test" />
-								</div>
-								<hr />
-								<button type="button" class="btn btn-primary">Submit</button>
-								<div class="form-group" hidden="hidden">
-									<hr />
-									<label>response</label>
-									<textarea class="form-control disabled" disabled="disabled"></textarea>
-								</div>
-							</form>
-						</div>
-					</li>
-					<li>
-						<h4>authorization_code</h4>
-						<ul>
-							<li>Public Client이면 사용</li>
-							<li>일반적인 웹브라우저 환경에서 service provider에서 인증 처리를 시키는 경우</li>
-							<li>`구글로 로그인` 이라던지 `페이스북으로 로그인` 이라던지 하는 버튼을 눌러서 해당 service provider로 이동 후 인증 처리하는 경우가 이 방법</li>
-							<li>인증은 service provider에서, consumer는 오로지 인가만 확인한다</li>
-							<li>다른 방법들과 다르게 Access Token을 바로 발급하지 않고, Access Token으로 교환하기 위한 Code를 발급한다.</li>
-							<li>일반적으로 클라가 발급받은 code를 서버단에서 검증하도록 구현함</li>
-						</ul>
-						<hr />
-						<p><a href="http://localhost:8080/oauth/authorize?client_id=from-web-application&response_type=code&redirect_uri=http://localhost:8080&scope=read">먼저 여기를 눌러 로그인하여 code 발급 , 아이디 = test , 비밀번호 = test</a></p>
-						<div class="card m-t-1">
-							<div class="card-header">Example &gt; cURL</div>
-							<div class="card-block">
-								<pre><code>curl -u from-web-application: http://localhost:8080/oauth/token -d "grant_type=authorization_code&redirect_uri=localhost:8080&code=[발급된 code]"</code></pre>
-								<hr />
-								<p>response example</p>
-								<pre><code>{
-	"access_token": "749d3a0e-73e7-4de8-acce-aeb4e67a2370",
-	"token_type": "bearer",
-	"refresh_token": "4a88e02f-c58d-4783-9190-0974f5a9c2e9",
-	"expires_in": 43199,
-	"scope": "read"
+              <hr/>
+              <p class="m-b-0">
+                Access Token을 만료하도록 설정했기 때문에 Refresh Token이
+                발급되었음
+              </p>
+              <p class="m-b-0">
+                expires_in은 만료까지 남은 시간으로 단위는 초 ( second )
+              </p>
+            </div>
+          </div>
+          <div class="card mt-3">
+            <div class="card-header p-2">Try via AJAX</div>
+            <form class="card-block p-2" grant_type="password">
+              <div class="form-group">
+                <label>client_id</label>
+                <input
+                    name="client_id"
+                    type="text"
+                    class="form-control"
+                    placeholder="service provider가 발급한 client_id"
+                    value="from-common-client"
+                />
+              </div>
+              <div class="form-group">
+                <label>username</label>
+                <input
+                    name="username"
+                    type="text"
+                    class="form-control"
+                    placeholder="service provider에 등록된 username"
+                    value="test"
+                />
+              </div>
+              <div class="form-group">
+                <label>password</label>
+                <input
+                    name="password"
+                    type="text"
+                    class="form-control"
+                    placeholder="service provider에 등록된 username의 password"
+                    value="test"
+                />
+              </div>
+              <hr/>
+              <button type="button" class="btn btn-primary">Submit</button>
+              <div class="form-group" hidden="hidden">
+                <hr/>
+                <label>response</label>
+                <textarea
+                    class="form-control disabled"
+                    disabled="disabled"
+                ></textarea>
+              </div>
+            </form>
+          </div>
+        </li>
+        <li>
+          <h4>authorization_code</h4>
+          <ul>
+            <li>Public Client이면 사용</li>
+            <li>
+              일반적인 웹브라우저 환경에서 service provider에서 인증 처리를
+              시키는 경우
+            </li>
+            <li>
+              `구글로 로그인` 이라던지 `페이스북으로 로그인` 이라던지 하는
+              버튼을 눌러서 해당 service provider로 이동 후 인증 처리하는
+              경우가 이 방법
+            </li>
+            <li>
+              인증은 service provider에서, consumer는 오로지 인가만 확인한다
+            </li>
+            <li>
+              다른 방법들과 다르게 Access Token을 바로 발급하지 않고, Access
+              Token으로 교환하기 위한 Code를 발급한다.
+            </li>
+            <li>
+              일반적으로 클라가 발급받은 code를 서버단에서 검증하도록 구현함
+            </li>
+          </ul>
+          <hr/>
+          <p>
+            <a
+                href="http://localhost:8080/oauth/authorize?client_id=from-web-application&response_type=code&redirect_uri=http://localhost:8080&scope=read"
+            >먼저 여기를 눌러 로그인하여 code 발급 , 아이디 = test ,
+              비밀번호 = test</a
+            >
+          </p>
+          <div class="card mt-3">
+            <div class="card-header p-2">Example &gt; cURL</div>
+            <div class="card-block p-2">
+                  <pre
+                      class="border border-info p-4"
+                  ><code>curl -u from-web-application: http://localhost:8080/oauth/token -d "grant_type=authorization_code&redirect_uri=localhost:8080&code=[발급된 code]"</code></pre>
+              <hr/>
+              <p>response example</p>
+              <pre class="border border-info p-4"><code>{
+      "access_token": "749d3a0e-73e7-4de8-acce-aeb4e67a2370",
+      "token_type": "bearer",
+      "refresh_token": "4a88e02f-c58d-4783-9190-0974f5a9c2e9",
+      "expires_in": 43199,
+      "scope": "read"
 }</code></pre>
-							</div>
-						</div>
-						<div class="card m-t-1">
-							<div class="card-header">Try via AJAX</div>
-							<form class="card-block" grant_type="authorization_code">
-								<div class="form-group">
-									<label>client_id</label>
-									<input name="client_id" type="text" class="form-control" placeholder="service provider가 발급한 client_id" value="from-web-application" />
-								</div>
-								<div class="form-group">
-									<label>code</label>
-									<input name="code" type="text" class="form-control" placeholder="authorization_code으로 인증 후 발급된 코드" />
-								</div>
-								<hr />
-								<button type="button" class="btn btn-primary">Submit</button>
-								<div class="form-group" hidden="hidden">
-									<hr />
-									<label>response</label>
-									<textarea class="form-control disabled" disabled="disabled"></textarea>
-								</div>
-							</form>
-						</div>
-					</li>
-					<li>
-						<h4>implicit</h4>
-						<ul>
-							<li>Public Client이면 사용</li>
-							<li>authorization_code와 비슷함</li>
-							<li>service provider에 등록된 사용자와 비밀번호를 한번에 날릴수도 있으며 scope에 대한 동의 처리가 무조건 동의함으로 처리됨</li>
-							<li>설정되어 있다면 response_type을 code로 할 수도 있음</li>
-							<li>service provider에서 인증이 성공하면 redirection으로 해시태그로 access token 정보를 알려줌</li>
-						</ul>
-						<hr />
-						<p><a href="http://localhost:8080/oauth/authorize?client_id=from-web-application&response_type=token&redirect_uri=http://localhost:8080&scope=read">여기를 눌러 로그인하여 access_token 발급 , 아이디 = test , 비밀번호 = test</a></p>
-						<div class="card m-t-1">
-							<div class="card-header">response @ hash-tag</div>
-							<form class="card-block" grant_type="implicit">
-								<div class="form-group">
-									<label>response</label>
-									<textarea class="form-control disabled" disabled="disabled"></textarea>
-								</div>
-							</form>
-						</div>
-					</li>
-					<li>
-						<h4>refresh_token</h4>
-						<ul>
-							<li>Access Token을 갱신</li>
-						</ul>
-						<div class="card m-t-1">
-							<div class="card-header">Example &gt; cURL</div>
-							<div class="card-block">
-								<pre><code>curl -u [access_token을 발급했던 client_id]: http://localhost:8080/oauth/token -d "grant_type=refresh_token&refresh_token=[access_token과 함께 발급된 refresh_token]"</code></pre>
-								<hr />
-								<p>response example</p>
-								<pre><code>{
-	"access_token": "a999f93b-f337-416d-bdca-d96583dc8ec7",
-	"token_type": "bearer",
-	"refresh_token": "e786c51e-e022-4f8f-86d9-00b4663f7558",
-	"expires_in": 59,
-	"scope": "read write"
+            </div>
+          </div>
+          <div class="card mt-3">
+            <div class="card-header p-2">Try via AJAX</div>
+            <form class="card-block p-2" grant_type="authorization_code">
+              <div class="form-group">
+                <label>client_id</label>
+                <input
+                    name="client_id"
+                    type="text"
+                    class="form-control"
+                    placeholder="service provider가 발급한 client_id"
+                    value="from-web-application"
+                />
+              </div>
+              <div class="form-group">
+                <label>code</label>
+                <input
+                    name="code"
+                    type="text"
+                    class="form-control"
+                    placeholder="authorization_code으로 인증 후 발급된 코드"
+                />
+              </div>
+              <hr/>
+              <button type="button" class="btn btn-primary">Submit</button>
+              <div class="form-group" hidden="hidden">
+                <hr/>
+                <label>response</label>
+                <textarea
+                    class="form-control disabled"
+                    disabled="disabled"
+                ></textarea>
+              </div>
+            </form>
+          </div>
+        </li>
+        <li>
+          <h4>implicit</h4>
+          <ul>
+            <li>Public Client이면 사용</li>
+            <li>authorization_code와 비슷함</li>
+            <li>
+              service provider에 등록된 사용자와 비밀번호를 한번에 날릴수도
+              있으며 scope에 대한 동의 처리가 무조건 동의함으로 처리됨
+            </li>
+            <li>설정되어 있다면 response_type을 code로 할 수도 있음</li>
+            <li>
+              service provider에서 인증이 성공하면 redirection으로
+              해시태그로 access token 정보를 알려줌
+            </li>
+          </ul>
+          <hr/>
+          <p>
+            <a
+                href="http://localhost:8080/oauth/authorize?client_id=from-web-application&response_type=token&redirect_uri=http://localhost:8080&scope=read"
+            >여기를 눌러 로그인하여 access_token 발급 , 아이디 = test ,
+              비밀번호 = test</a
+            >
+          </p>
+          <div class="card mt-3">
+            <div class="card-header p-2">response @ hash-tag</div>
+            <form class="card-block p-2" grant_type="implicit">
+              <div class="form-group">
+                <label>response</label>
+                <textarea
+                    class="form-control disabled"
+                    disabled="disabled"
+                ></textarea>
+              </div>
+            </form>
+          </div>
+        </li>
+        <li>
+          <h4>refresh_token</h4>
+          <ul>
+            <li>Access Token을 갱신</li>
+          </ul>
+          <div class="card mt-3">
+            <div class="card-header p-2">Example &gt; cURL</div>
+            <div class="card-block p-2">
+                  <pre
+                      class="border border-info p-4"
+                  ><code>curl -u [access_token을 발급했던 client_id]: http://localhost:8080/oauth/token -d "grant_type=refresh_token&refresh_token=[access_token과 함께 발급된 refresh_token]"</code></pre>
+              <hr/>
+              <p>response example</p>
+              <pre class="border border-info p-4"><code>{
+      "access_token": "a999f93b-f337-416d-bdca-d96583dc8ec7",
+      "token_type": "bearer",
+      "refresh_token": "e786c51e-e022-4f8f-86d9-00b4663f7558",
+      "expires_in": 59,
+      "scope": "read write"
 }</code></pre>
-							</div>
-						</div>
-						<div class="card m-t-1">
-							<div class="card-header">Try via AJAX</div>
-							<form class="card-block" grant_type="refresh_token">
-								<div class="form-group">
-									<label>client_id</label>
-									<input name="client_id" type="text" class="form-control" placeholder="access_token을 발급했던 client_id" />
-								</div>
-								<div class="form-group">
-									<label>refresh_token</label>
-									<input name="refresh_token" type="text" class="form-control" placeholder="access_token과 함께 발급된 refresh_token" />
-								</div>
-								<hr />
-								<button type="button" class="btn btn-primary">Submit</button>
-								<div class="form-group" hidden="hidden">
-									<hr />
-									<label>response</label>
-									<textarea class="form-control disabled" disabled="disabled"></textarea>
-								</div>
-							</form>
-						</div>
-					</li>
-				</ol>
-			</div>
-		</div>
-		
-		<div class="row m-t-3">
-			<div class="col-xs-12">
-				<h2><strong>2. Resource 서버에 구현된 RestFul API 로의 요청</strong></h2>
-				<ul>
-					<li>단순히 로그인 되어 있다고 해서 API에 접근할 수 있게 해두진 않았음</li>
-					<li>자원 서버는 OAuth2로 확인된 사용자의 Scope에서 read가 선언되어 있는지 확인</li>
-				</ul>
-				<div class="card m-t-1">
-					<div class="card-header">Example &gt; cURL</div>
-					<div class="card-block">
-						<pre><code>curl -v -H "Authorization: Bearer [발급된 access_token]" http://localhost:8080/api/fruits</code></pre>
-						<hr />
-						<p>response example</p>
-						<pre><code>{
-	"_embedded": {
-		"fruits": [
-			{
-				"name": "apple",
-				"color": "red",
-				"_links": {
-					"self": {
-						"href": "http://localhost:8080/api/fruits/1"
-					},
-					"fruit": {
-						"href": "http://localhost:8080/api/fruits/1"
-					}
-				}
-			}
-		]
-	},
-	"_links": {
-		"self": {
-			"href": "http://localhost:8080/api/fruits"
-		},
-		"profile": {
-			"href": "http://localhost:8080/api/profile/fruits"
-		}
-	},
-	"page": {
-		"size": 20,
-		"totalElements": 1,
-		"totalPages": 1,
-		"number": 0
-	}
-}</code></pre>
-					</div>
-				</div>
-				<div class="card m-t-1">
-					<div class="card-header">Try via AJAX</div>
-					<form class="card-block" exec="rest-fruits">
-						<div class="form-group">
-							<label>access_token</label>
-							<input name="access_token" type="text" class="form-control" placeholder="발급받은 access_token" />
-						</div>
-						<hr />
-						<button type="button" class="btn btn-primary">Submit</button>
-						<div class="form-group" hidden="hidden">
-							<hr />
-							<label>response</label>
-							<textarea rows="32" class="form-control disabled" disabled="disabled"></textarea>
-						</div>
-					</form>
-				</div>
-			</div>
-		</div>
-	</div>
+            </div>
+          </div>
+          <div class="card mt-3">
+            <div class="card-header p-2">Try via AJAX</div>
+            <form class="card-block p-2" grant_type="refresh_token">
+              <div class="form-group">
+                <label>client_id</label>
+                <input
+                    name="client_id"
+                    type="text"
+                    class="form-control"
+                    placeholder="access_token을 발급했던 client_id"
+                />
+              </div>
+              <div class="form-group">
+                <label>refresh_token</label>
+                <input
+                    name="refresh_token"
+                    type="text"
+                    class="form-control"
+                    placeholder="access_token과 함께 발급된 refresh_token"
+                />
+              </div>
+              <hr/>
+              <button type="button" class="btn btn-primary">Submit</button>
+              <div class="form-group" hidden="hidden">
+                <hr/>
+                <label>response</label>
+                <textarea
+                    class="form-control disabled"
+                    disabled="disabled"
+                ></textarea>
+              </div>
+            </form>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="container mt-3">
+    <h2 class="display-4">
+      2. Resource 서버에 구현된 RestFul API 로의 요청
+    </h2>
+    <ul>
+      <li>
+        단순히 로그인 되어 있다고 해서 API에 접근할 수 있게 해두진 않았음
+      </li>
+      <li>
+        자원 서버는 OAuth2로 확인된 사용자의 Scope에서 read가 선언되어
+        있는지 확인
+      </li>
+    </ul>
+    <div class="card mt-3">
+      <div class="card-header p-2">Example &gt; cURL</div>
+      <div class="card-block p-2">
+            <pre
+                class="border border-info p-4"
+            ><code>curl -v -H "Authorization: Bearer [발급된 access_token]" http://localhost:8080/api/fruits</code></pre>
+        <hr/>
+        <p>response example</p>
+        <pre class="border border-info p-4"><code>{
+    "_embedded": {
+      "fruits": [
+        {
+          "name": "apple",
+          "color": "red",
+          "_links": {
+            "self": {
+              "href": "http://localhost:8080/api/fruits/1"
+            },
+            "fruit": {
+              "href": "http://localhost:8080/api/fruits/1"
+            }
+          }
+        }
+      ]
+    },
+    "_links": {
+      "self": {
+        "href": "http://localhost:8080/api/fruits"
+      },
+      "profile": {
+        "href": "http://localhost:8080/api/profile/fruits"
+      }
+    },
+    "page": {
+      "size": 20,
+      "totalElements": 1,
+      "totalPages": 1,
+      "number": 0
+    }
+  }</code></pre>
+      </div>
+    </div>
+    <div class="card mt-3">
+      <div class="card-header p-2">Try via AJAX</div>
+      <form class="card-block p-2" exec="rest-fruits">
+        <div class="form-group">
+          <label>access_token</label>
+          <input
+              name="access_token"
+              type="text"
+              class="form-control"
+              placeholder="발급받은 access_token"
+          />
+        </div>
+        <hr/>
+        <button type="button" class="btn btn-primary">Submit</button>
+        <div class="form-group" hidden="hidden">
+          <hr/>
+          <label>response</label>
+          <textarea
+              rows="32"
+              class="form-control disabled"
+              disabled="disabled"
+          ></textarea>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 </body>
 </html>
